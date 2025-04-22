@@ -1,0 +1,2262 @@
+{
+	"info": {
+		"_postman_id": "650d0a75-085e-41f9-83e1-72e560b26f05",
+		"name": "LeadratBlack",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "44208231",
+		"_collection_link": "https://leadratblack.postman.co/workspace/LeadratBlack~1e224900-95d9-46db-82f9-1caf8188d53e/collection/44208231-650d0a75-085e-41f9-83e1-72e560b26f05?action=share&source=collection_link&creator=44208231"
+	},
+	"item": [
+		{
+			"name": "Mobile",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "tenant",
+								"value": "sleep"
+							}
+						],
+						"url": {
+							"raw": "{{baseURL}}/api/v1/todo?PageNumber=1&PageSize=10",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"todo"
+							],
+							"query": [
+								{
+									"key": "PageNumber",
+									"value": "1"
+								},
+								{
+									"key": "PageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							"// Get current time in seconds\r",
+							"const now = Math.floor(Date.now() / 1000);\r",
+							"\r",
+							"// Retrieve existing token and expiry from environment\r",
+							"const existingToken = pm.environment.get(\"bearerToken\");\r",
+							"const tokenExpiry = parseInt(pm.environment.get(\"tokenExpiry\") || \"0\");\r",
+							"\r",
+							"// Function to decode JWT and get expiry (exp) field\r",
+							"function getTokenExpiry(token) {\r",
+							"    try {\r",
+							"        const payload = JSON.parse(atob(token.split('.')[1]));\r",
+							"        return payload.exp;\r",
+							"    } catch (e) {\r",
+							"        console.log(\"Failed to parse token expiry:\", e);\r",
+							"        return 0;\r",
+							"    }\r",
+							"}\r",
+							"\r",
+							"// Check if token is valid and not expired\r",
+							"if (existingToken && tokenExpiry > now) {\r",
+							"    console.log(\"Using existing token:\");\r",
+							"    console.log(\"Token:\", existingToken);\r",
+							"} else {\r",
+							"    // Token is expired or not present, make API call\r",
+							"    pm.sendRequest({\r",
+							"        url: pm.environment.get(\"baseURLIdentity\") + \"/api/mobile/tokens\",\r",
+							"        method: \"POST\",\r",
+							"        header: {\r",
+							"            \"accept\": \"application/json\",\r",
+							"            \"tenant\": pm.environment.get(\"tenant\"),\r",
+							"            \"Content-Type\": \"application/json\"\r",
+							"        },\r",
+							"        body: {\r",
+							"            mode: \"raw\",\r",
+							"            raw: JSON.stringify({\r",
+							"                username: pm.environment.get(\"username\"),\r",
+							"                password: pm.environment.get(\"password\")\r",
+							"            })\r",
+							"        }\r",
+							"    }, function (err, res) {\r",
+							"        if (err) {\r",
+							"            console.log(\"Error fetching token:\", err);\r",
+							"            return;\r",
+							"        }\r",
+							"        try {\r",
+							"            const jsonData = res.json();\r",
+							"            const idToken = jsonData.data.idToken;\r",
+							"            pm.environment.set(\"bearerToken\", idToken);\r",
+							"\r",
+							"            // Decode expiry and save it\r",
+							"            const exp = getTokenExpiry(idToken);\r",
+							"            pm.environment.set(\"tokenExpiry\", exp);\r",
+							"\r",
+							"            console.log(\"New token fetched and saved:\");\r",
+							"            console.log(\"Token:\", idToken);\r",
+							"        } catch (e) {\r",
+							"            console.log(\"Error parsing token response:\", e);\r",
+							"        }\r",
+							"    });\r",
+							"}\r",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Web",
+			"item": [
+				{
+					"name": "Integration",
+					"item": [
+						{
+							"name": "magicbricks",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "API-Key",
+										"value": "{{apiKey}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"{{name}}\",\n  \"state\": \"{{state}}\",\n  \"city\": \"{{city}}\",\n  \"location\": \"{{location}}\",\n  \"budget\": \"5403192\",\n  \"notes\": \"comments\",\n  \"email\": \"{{email}}\",\n  \"countryCode\": \"91\",\n  \"mobile\": \"{{mobile}}\",\n  \"project\": \"Aamor\",\n  \"property\": \"Villa\",\n  \"leadExpectedBudget\": \"6000000\",\n  \"propertyType\": \"Flat\",\n  \"propertySubType\": \"Plot\",\n  \"submittedDate\": \"28-03-18\",\n  \"submittedTime\": \"22:22:32\",\n  \"subsource\": \"\",\n  \"leadStatus\": \"Schedule Site Visit or Schedule Meeting or Booked or Booking Cancel\",\n  \"callRecordingUrl\": \"\",\n  \"leadScheduledDate\": \"28-03-18\",\n  \"leadScheduleTime\": \"22:22:32\",\n  \"bhkType\": \"Simplex/Duplex/PentHouse/Others\",\n  \"leadBookedDate\": \"28-03-18\",\n  \"leadBookedTime\": \"22:22:32\",\n  \"additionalProperties\": {\n    \"EnquiredFor\": \"Buy/Sale/Rent\",\n    \"BHKType\": \"Simplex/Duplex/PentHouse/Others\",\n    \"NoOfBHK\": \"0\",\n    \"key1\": \"value1\",\n    \"key2\": \"value1\"\n  },\n  \"primaryUser\": \"Rahul N\",\n  \"secondaryUser\": \"Ranjan Gupta\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURLIntegration}}/api/v1/integration/MagicBricks",
+									"host": [
+										"{{baseURLIntegration}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"integration",
+										"MagicBricks"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "housing",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "API-Key",
+										"value": "{{apiKey}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"{{name}}\",\n  \"state\": \"{{state}}\",\n  \"city\": \"{{city}}\",\n  \"location\": \"{{location}}\",\n  \"budget\": \"5403192\",\n  \"notes\": \"comments\",\n  \"email\": \"{{email}}\",\n  \"countryCode\": \"91\",\n  \"mobile\": \"{{mobile}}\",\n  \"project\": \"Aamor\",\n  \"property\": \"Villa\",\n  \"leadExpectedBudget\": \"6000000\",\n  \"propertyType\": \"Flat\",\n  \"propertySubType\": \"Plot\",\n  \"submittedDate\": \"28-03-18\",\n  \"submittedTime\": \"22:22:32\",\n  \"subsource\": \"\",\n  \"leadStatus\": \"Schedule Site Visit or Schedule Meeting or Booked or Booking Cancel\",\n  \"callRecordingUrl\": \"\",\n  \"leadScheduledDate\": \"28-03-18\",\n  \"leadScheduleTime\": \"22:22:32\",\n  \"bhkType\": \"Simplex/Duplex/PentHouse/Others\",\n  \"leadBookedDate\": \"28-03-18\",\n  \"leadBookedTime\": \"22:22:32\",\n  \"additionalProperties\": {\n    \"EnquiredFor\": \"Buy/Sale/Rent\",\n    \"BHKType\": \"Simplex/Duplex/PentHouse/Others\",\n    \"NoOfBHK\": \"0\",\n    \"key1\": \"value1\",\n    \"key2\": \"value1\"\n  },\n  \"primaryUser\": \"Rahul N\",\n  \"secondaryUser\": \"Ranjan Gupta\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURLIntegration}}/api/v1/integration/Housing",
+									"host": [
+										"{{baseURLIntegration}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"integration",
+										"Housing"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "roofandfloor",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "API-Key",
+										"value": "{{apiKey}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"{{name}}\",\n  \"state\": \"{{state}}\",\n  \"city\": \"{{city}}\",\n  \"location\": \"{{location}}\",\n  \"budget\": \"5403192\",\n  \"notes\": \"comments\",\n  \"email\": \"{{email}}\",\n  \"countryCode\": \"91\",\n  \"mobile\": \"{{mobile}}\",\n  \"project\": \"Aamor\",\n  \"property\": \"Villa\",\n  \"leadExpectedBudget\": \"6000000\",\n  \"propertyType\": \"Flat\",\n  \"propertySubType\": \"Plot\",\n  \"submittedDate\": \"28-03-18\",\n  \"submittedTime\": \"22:22:32\",\n  \"subsource\": \"\",\n  \"leadStatus\": \"Schedule Site Visit or Schedule Meeting or Booked or Booking Cancel\",\n  \"callRecordingUrl\": \"\",\n  \"leadScheduledDate\": \"28-03-18\",\n  \"leadScheduleTime\": \"22:22:32\",\n  \"bhkType\": \"Simplex/Duplex/PentHouse/Others\",\n  \"leadBookedDate\": \"28-03-18\",\n  \"leadBookedTime\": \"22:22:32\",\n  \"additionalProperties\": {\n    \"EnquiredFor\": \"Buy/Sale/Rent\",\n    \"BHKType\": \"Simplex/Duplex/PentHouse/Others\",\n    \"NoOfBHK\": \"0\",\n    \"key1\": \"value1\",\n    \"key2\": \"value1\"\n  },\n  \"primaryUser\": \"Rahul N\",\n  \"secondaryUser\": \"Ranjan Gupta\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURLIntegration}}/api/v1/integration/RoofandFloor",
+									"host": [
+										"{{baseURLIntegration}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"integration",
+										"RoofandFloor"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "ninety_nine_acres",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "API-Key",
+										"value": "{{apiKey}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"{{name}}\",\n  \"state\": \"{{state}}\",\n  \"city\": \"{{city}}\",\n  \"location\": \"{{location}}\",\n  \"budget\": \"5403192\",\n  \"notes\": \"comments\",\n  \"email\": \"{{email}}\",\n  \"countryCode\": \"91\",\n  \"mobile\": \"{{mobile}}\",\n  \"project\": \"Aamor\",\n  \"property\": \"Villa\",\n  \"leadExpectedBudget\": \"6000000\",\n  \"propertyType\": \"Flat\",\n  \"propertySubType\": \"Plot\",\n  \"submittedDate\": \"28-03-18\",\n  \"submittedTime\": \"22:22:32\",\n  \"subsource\": \"\",\n  \"leadStatus\": \"Schedule Site Visit or Schedule Meeting or Booked or Booking Cancel\",\n  \"callRecordingUrl\": \"\",\n  \"leadScheduledDate\": \"28-03-18\",\n  \"leadScheduleTime\": \"22:22:32\",\n  \"bhkType\": \"Simplex/Duplex/PentHouse/Others\",\n  \"leadBookedDate\": \"28-03-18\",\n  \"leadBookedTime\": \"22:22:32\",\n  \"additionalProperties\": {\n    \"EnquiredFor\": \"Buy/Sale/Rent\",\n    \"BHKType\": \"Simplex/Duplex/PentHouse/Others\",\n    \"NoOfBHK\": \"0\",\n    \"key1\": \"value1\",\n    \"key2\": \"value1\"\n  },\n  \"primaryUser\": \"Rahul N\",\n  \"secondaryUser\": \"Ranjan Gupta\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURLIntegration}}/api/v1/integration/NinetyNineAcres",
+									"host": [
+										"{{baseURLIntegration}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"integration",
+										"NinetyNineAcres"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "quickr_homes",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "API-Key",
+										"value": "{{apiKey}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"{{name}}\",\n  \"state\": \"{{state}}\",\n  \"city\": \"{{city}}\",\n  \"location\": \"{{location}}\",\n  \"budget\": \"5403192\",\n  \"notes\": \"comments\",\n  \"email\": \"{{email}}\",\n  \"countryCode\": \"91\",\n  \"mobile\": \"{{mobile}}\",\n  \"project\": \"Aamor\",\n  \"property\": \"Villa\",\n  \"leadExpectedBudget\": \"6000000\",\n  \"propertyType\": \"Flat\",\n  \"propertySubType\": \"Plot\",\n  \"submittedDate\": \"28-03-18\",\n  \"submittedTime\": \"22:22:32\",\n  \"subsource\": \"\",\n  \"leadStatus\": \"Schedule Site Visit or Schedule Meeting or Booked or Booking Cancel\",\n  \"callRecordingUrl\": \"\",\n  \"leadScheduledDate\": \"28-03-18\",\n  \"leadScheduleTime\": \"22:22:32\",\n  \"bhkType\": \"Simplex/Duplex/PentHouse/Others\",\n  \"leadBookedDate\": \"28-03-18\",\n  \"leadBookedTime\": \"22:22:32\",\n  \"additionalProperties\": {\n    \"EnquiredFor\": \"Buy/Sale/Rent\",\n    \"BHKType\": \"Simplex/Duplex/PentHouse/Others\",\n    \"NoOfBHK\": \"0\",\n    \"key1\": \"value1\",\n    \"key2\": \"value1\"\n  },\n  \"primaryUser\": \"Rahul N\",\n  \"secondaryUser\": \"Ranjan Gupta\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURLIntegration}}/api/v1/integration/QuikrHomes",
+									"host": [
+										"{{baseURLIntegration}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"integration",
+										"QuikrHomes"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "estate_dekho",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "API-Key",
+										"value": "{{apiKey}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"{{name}}\",\n  \"state\": \"{{state}}\",\n  \"city\": \"{{city}}\",\n  \"location\": \"{{location}}\",\n  \"budget\": \"5403192\",\n  \"notes\": \"comments\",\n  \"email\": \"{{email}}\",\n  \"countryCode\": \"91\",\n  \"mobile\": \"{{mobile}}\",\n  \"project\": \"Aamor\",\n  \"property\": \"Villa\",\n  \"leadExpectedBudget\": \"6000000\",\n  \"propertyType\": \"Flat\",\n  \"propertySubType\": \"Plot\",\n  \"submittedDate\": \"28-03-18\",\n  \"submittedTime\": \"22:22:32\",\n  \"subsource\": \"\",\n  \"leadStatus\": \"Schedule Site Visit or Schedule Meeting or Booked or Booking Cancel\",\n  \"callRecordingUrl\": \"\",\n  \"leadScheduledDate\": \"28-03-18\",\n  \"leadScheduleTime\": \"22:22:32\",\n  \"bhkType\": \"Simplex/Duplex/PentHouse/Others\",\n  \"leadBookedDate\": \"28-03-18\",\n  \"leadBookedTime\": \"22:22:32\",\n  \"additionalProperties\": {\n    \"EnquiredFor\": \"Buy/Sale/Rent\",\n    \"BHKType\": \"Simplex/Duplex/PentHouse/Others\",\n    \"NoOfBHK\": \"0\",\n    \"key1\": \"value1\",\n    \"key2\": \"value1\"\n  },\n  \"primaryUser\": \"Rahul N\",\n  \"secondaryUser\": \"Ranjan Gupta\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURLIntegration}}/api/v1/integration/EstateDekho",
+									"host": [
+										"{{baseURLIntegration}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"integration",
+										"EstateDekho"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "real_estate_india",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Api-Key",
+										"value": "{{apiKey}}"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "name",
+											"value": "{{name}}",
+											"type": "text"
+										},
+										{
+											"key": "mobile",
+											"value": "{{mobile}}",
+											"type": "text"
+										},
+										{
+											"key": "email",
+											"value": "{{email}}",
+											"type": "text"
+										},
+										{
+											"key": "inquiry_id",
+											"value": "12345",
+											"type": "text"
+										},
+										{
+											"key": "subject",
+											"value": "property Inquiry",
+											"type": "text"
+										},
+										{
+											"key": "details",
+											"value": "property Inquiry details",
+											"type": "text"
+										},
+										{
+											"key": "property_id",
+											"value": "54321",
+											"type": "text"
+										},
+										{
+											"key": "recv_date",
+											"value": "2023-04-6",
+											"type": "text"
+										},
+										{
+											"key": "lookinf_for",
+											"value": "3 bhk flat for Rent",
+											"type": "text"
+										},
+										{
+											"key": "address",
+											"value": "{{location}},{{city}},{{state}}",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseURLIntegration}}/api/v1/integration/RealEstateIndia",
+									"host": [
+										"{{baseURLIntegration}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"integration",
+										"RealEstateIndia"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "property_wala",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "name",
+											"value": "{{name}}",
+											"type": "text"
+										},
+										{
+											"key": "state",
+											"value": "{{state}}",
+											"type": "text"
+										},
+										{
+											"key": "city",
+											"value": "{{city}}",
+											"type": "text"
+										},
+										{
+											"key": "location",
+											"value": "{{location}}",
+											"type": "text"
+										},
+										{
+											"key": "budget",
+											"value": "5403192",
+											"type": "text"
+										},
+										{
+											"key": "notes",
+											"value": "comments",
+											"type": "text"
+										},
+										{
+											"key": "email",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "countryCode",
+											"value": "91",
+											"type": "text"
+										},
+										{
+											"key": "mobile",
+											"value": "{{mobile}}",
+											"type": "text"
+										},
+										{
+											"key": "project",
+											"value": "Aamor",
+											"type": "text"
+										},
+										{
+											"key": "property",
+											"value": "Villa",
+											"type": "text"
+										},
+										{
+											"key": "leadExpectedBudget",
+											"value": "6000000",
+											"type": "text"
+										},
+										{
+											"key": "propertyType",
+											"value": "Flat",
+											"type": "text"
+										},
+										{
+											"key": "propertySubType",
+											"value": "Plot",
+											"type": "text"
+										},
+										{
+											"key": "submittedDate",
+											"value": "28-03-18",
+											"type": "text"
+										},
+										{
+											"key": "submittedTime",
+											"value": "22:22:32",
+											"type": "text"
+										},
+										{
+											"key": "subsource",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "leadStatus",
+											"value": "Schedule Site Visit or Schedule Meeting or Booked or Booking Cancel",
+											"type": "text"
+										},
+										{
+											"key": "callRecordingUrl",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "leadScheduledDate",
+											"value": "28-03-18",
+											"type": "text"
+										},
+										{
+											"key": "leadScheduleTime",
+											"value": "22:22:32",
+											"type": "text"
+										},
+										{
+											"key": "bhkType",
+											"value": "Simplex/Duplex/PentHouse/Others",
+											"type": "text"
+										},
+										{
+											"key": "leadBookedDate",
+											"value": "28-03-18",
+											"type": "text"
+										},
+										{
+											"key": "leadBookedTime",
+											"value": "22:22:32",
+											"type": "text"
+										},
+										{
+											"key": "additionalProperties",
+											"value": "{\n  \"EnquiredFor\": \"Buy/Sale/Rent\",\n  \"BHKType\": \"Simplex/Duplex/PentHouse/Others\",\n  \"NoOfBHK\": \"0\",\n  \"key1\": \"value1\",\n  \"key2\": \"value1\"\n}",
+											"type": "text"
+										},
+										{
+											"key": "primaryUser",
+											"value": "Rahul N",
+											"type": "text"
+										},
+										{
+											"key": "secondaryUser",
+											"value": "Ranjan Gupta",
+											"type": "text"
+										},
+										{
+											"key": "ApiKey",
+											"value": "{{apiKey}}",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseURLIntegration}}/api/v1/integration/PropertyWala/{{tenant}}",
+									"host": [
+										"{{baseURLIntegration}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"integration",
+										"PropertyWala",
+										"{{tenant}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "mygate",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "API-Key",
+										"value": "{{apiKey}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"{{name}}\",\n  \"state\": \"{{state}}\",\n  \"city\": \"{{city}}\",\n  \"location\": \"{{location}}\",\n  \"budget\": \"5403192\",\n  \"notes\": \"comments\",\n  \"email\": \"{{email}}\",\n  \"countryCode\": \"91\",\n  \"mobile\": \"{{mobile}}\",\n  \"project\": \"Aamor\",\n  \"property\": \"Villa\",\n  \"leadExpectedBudget\": \"6000000\",\n  \"propertyType\": \"Flat\",\n  \"propertySubType\": \"Plot\",\n  \"submittedDate\": \"28-03-18\",\n  \"submittedTime\": \"22:22:32\",\n  \"subsource\": \"\",\n  \"leadStatus\": \"Schedule Site Visit or Schedule Meeting or Booked or Booking Cancel\",\n  \"callRecordingUrl\": \"\",\n  \"leadScheduledDate\": \"28-03-18\",\n  \"leadScheduleTime\": \"22:22:32\",\n  \"bhkType\": \"Simplex/Duplex/PentHouse/Others\",\n  \"leadBookedDate\": \"28-03-18\",\n  \"leadBookedTime\": \"22:22:32\",\n  \"additionalProperties\": {\n    \"EnquiredFor\": \"Buy/Sale/Rent\",\n    \"BHKType\": \"Simplex/Duplex/PentHouse/Others\",\n    \"NoOfBHK\": \"0\",\n    \"key1\": \"value1\",\n    \"key2\": \"value1\"\n  },\n  \"primaryUser\": \"Rahul N\",\n  \"secondaryUser\": \"Ranjan Gupta\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURLIntegration}}/api/v1/integration/MyGate",
+									"host": [
+										"{{baseURLIntegration}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"integration",
+										"MyGate"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "flipkart",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "API-Key",
+										"value": "{{apiKey}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"{{name}}\",\n  \"state\": \"{{state}}\",\n  \"city\": \"{{city}}\",\n  \"location\": \"{{location}}\",\n  \"budget\": \"5403192\",\n  \"notes\": \"comments\",\n  \"email\": \"\",\n  \"countryCode\": \"91\",\n  \"mobile\": \"{{mobile}}\",\n  \"project\": \"Aamor\",\n  \"property\": \"Villa\",\n  \"leadExpectedBudget\": \"6000000\",\n  \"propertyType\": \"Flat\",\n  \"propertySubType\": \"Plot\",\n  \"submittedDate\": \"28-03-18\",\n  \"submittedTime\": \"22:22:32\",\n  \"subsource\": \"\",\n  \"leadStatus\": \"Schedule Site Visit or Schedule Meeting or Booked or Booking Cancel\",\n  \"callRecordingUrl\": \"\",\n  \"leadScheduledDate\": \"28-03-18\",\n  \"leadScheduleTime\": \"22:22:32\",\n  \"bhkType\": \"Simplex/Duplex/PentHouse/Others\",\n  \"leadBookedDate\": \"28-03-18\",\n  \"leadBookedTime\": \"22:22:32\",\n  \"additionalProperties\": {\n    \"EnquiredFor\": \"Buy/Sale/Rent\",\n    \"BHKType\": \"Simplex/Duplex/PentHouse/Others\",\n    \"NoOfBHK\": \"0\",\n    \"key1\": \"value1\",\n    \"key2\": \"value1\"\n  },\n  \"primaryUser\": \"Rahul N\",\n  \"secondaryUser\": \"Ranjan Gupta\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURLIntegration}}/api/v1/integration/Flipkart",
+									"host": [
+										"{{baseURLIntegration}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"integration",
+										"Flipkart"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "whatsapp",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "API-Key",
+										"value": "{{apiKey}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"{{name}}\",\n  \"state\": \"{{state}}\",\n  \"city\": \"{{city}}\",\n  \"location\": \"{{location}}\",\n  \"budget\": \"5403192\",\n  \"notes\": \"comments\",\n  \"email\": \"{{email}}\",\n  \"countryCode\": \"91\",\n  \"mobile\": \"{{mobile}}\",\n  \"project\": \"Aamor\",\n  \"property\": \"Villa\",\n  \"leadExpectedBudget\": \"6000000\",\n  \"propertyType\": \"Flat\",\n  \"propertySubType\": \"Plot\",\n  \"submittedDate\": \"28-03-18\",\n  \"submittedTime\": \"22:22:32\",\n  \"subsource\": \"\",\n  \"leadStatus\": \"Schedule Site Visit or Schedule Meeting or Booked or Booking Cancel\",\n  \"callRecordingUrl\": \"\",\n  \"leadScheduledDate\": \"28-03-18\",\n  \"leadScheduleTime\": \"22:22:32\",\n  \"bhkType\": \"Simplex/Duplex/PentHouse/Others\",\n  \"leadBookedDate\": \"28-03-18\",\n  \"leadBookedTime\": \"22:22:32\",\n  \"additionalProperties\": {\n    \"EnquiredFor\": \"Buy/Sale/Rent\",\n    \"BHKType\": \"Simplex/Duplex/PentHouse/Others\",\n    \"NoOfBHK\": \"0\",\n    \"key1\": \"value1\",\n    \"key2\": \"value1\"\n  },\n  \"primaryUser\": \"Rahul N\",\n  \"secondaryUser\": \"Ranjan Gupta\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURLIntegration}}/api/v1/integration/whatsapp",
+									"host": [
+										"{{baseURLIntegration}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"integration",
+										"whatsapp"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "common_floor",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "API-Key",
+										"value": "{{apiKey}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"{{name}}\",\n  \"state\": \"{{state}}\",\n  \"city\": \"{{city}}\",\n  \"location\": \"{{location}}\",\n  \"budget\": \"5403192\",\n  \"notes\": \"comments\",\n  \"email\": \"{{email}}\",\n  \"countryCode\": \"91\",\n  \"mobile\": \"{{mobile}}\",\n  \"project\": \"Aamor\",\n  \"property\": \"Villa\",\n  \"leadExpectedBudget\": \"6000000\",\n  \"propertyType\": \"Flat\",\n  \"propertySubType\": \"Plot\",\n  \"submittedDate\": \"28-03-18\",\n  \"submittedTime\": \"22:22:32\",\n  \"subsource\": \"\",\n  \"leadStatus\": \"Schedule Site Visit or Schedule Meeting or Booked or Booking Cancel\",\n  \"callRecordingUrl\": \"\",\n  \"leadScheduledDate\": \"28-03-18\",\n  \"leadScheduleTime\": \"22:22:32\",\n  \"bhkType\": \"Simplex/Duplex/PentHouse/Others\",\n  \"leadBookedDate\": \"28-03-18\",\n  \"leadBookedTime\": \"22:22:32\",\n  \"additionalProperties\": {\n    \"EnquiredFor\": \"Buy/Sale/Rent\",\n    \"BHKType\": \"Simplex/Duplex/PentHouse/Others\",\n    \"NoOfBHK\": \"0\",\n    \"key1\": \"value1\",\n    \"key2\": \"value1\"\n  },\n  \"primaryUser\": \"Rahul N\",\n  \"secondaryUser\": \"Ranjan Gupta\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURLIntegration}}/api/v1/integration/CommonFloor",
+									"host": [
+										"{{baseURLIntegration}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"integration",
+										"CommonFloor"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "justLead",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "API-Key",
+										"value": "{{apiKey}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"{{name}}\",\n    \"state\": \"{{state}}\",\n    \"city\": \"{{city}}\",\n    \"postalCode\": \"587121\",\n    \"location\": \"{{location}}\",\n    \"budget\": \"5403192\",\n    \"notes\": \"comments\",\n    \"email\": \"{{email}}\",\n    \"countryCode\": \"91\",\n    \"mobile\": \"{{mobile}}\",\n    \"project\": \"Aamor\",\n    \"property\": \"Villa\",\n    \"leadExpectedBudget\": \"6000000\",\n    \"propertyType\": \"Flat\",\n    \"propertySubType\": \"Plot\",\n    \"submittedDate\": \"28-03-18\",\n    \"submittedTime\": \"22:22:32\",\n    \"subsource\": \"\",\n    \"leadStatus\": \"Schedule Site Visit or Schedule Meeting or Booked or Booking Cancel\",\n    \"callRecordingUrl\": \"\",\n    \"leadScheduledDate\": \"28-03-18\",\n    \"leadScheduleTime\": \"22:22:32\",\n    \"bhkType\": \"Simplex/Duplex/PentHouse/Others\",\n    \"leadBookedDate\": \"28-03-18\",\n    \"leadBookedTime\": \"22:22:32\",\n    \"additionalProperties\": {\n        \"EnquiredFor\": \"Buy/Sale/Rent\",\n        \"BHKType\": \"Simplex/Duplex/PentHouse/Others\",\n        \"NoOfBHK\": \"0\",\n        \"key1\": \"value1\",\n        \"key2\": \"value1\"\n    },\n    \"primaryUser\": \"Rahul N\",\n    \"secondaryUser\": \"Ranjan Gupta\",\n    \"towerName\": \"Matloob Building\",\n    \"subCommunity\": \"Al Safa 1\",\n    \"community\": \"Al Safa\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURLIntegration}}/api/v1/integration/JustLead",
+									"host": [
+										"{{baseURLIntegration}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"integration",
+										"JustLead"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "bayut",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"listing\": {\n    \"url\": \"\",\n    \"reference\": \"\"\n  },\n  \"id\": \"1291df0-afca-453e-a9b7-20cdfbb9f074\",\n  \"message\": \"Hi, I am interested in your property on Bayut\",\n  \"received_at\": \"2023-09-14T12:00:15.550546Z\",\n  \"enquirer\": {\n    \"name\": \"{{name}}\",\n    \"contact_link\": \"\",\n    \"phone_number\": \"{{mobile}}\"\n  },\n  \"wam_id\": \"\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURLIntegration}}/api/v1/integration/bayut/{{tenant}}/{{apiKey}}",
+									"host": [
+										"{{baseURLIntegration}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"integration",
+										"bayut",
+										"{{tenant}}",
+										"{{apiKey}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "property_finder",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"data\": {\n    \"type\": \"whatsapp_leads\",\n    \"id\": \"4c67e5be-c4e1-11ef-beb7-02cc190b3e99\",\n    \"attributes\": {\n      \"enquirer_phone_number\": \"+91{{mobile}}\",\n      \"language\": \"en\",\n      \"message\": \"Hello, I would like to get more information about this property: Link: https://www.propertyfinder.ae\",\n      \"received_at\": \"2024-09-28T06:02:20Z\",\n      \"tracking_link\": \"https://www.propertyfinder.ae\"\n    },\n    \"relationships\": {\n      \"agents\": {\n        \"data\": {\n          \"type\": \"agents\",\n          \"id\": \"123456\",\n          \"attributes\": {\n            \"email\": \"rajeevranjan@gmail.com\",\n            \"full_name\": \"Rajeev Ranjan\",\n            \"whatsapp_phone_number\": \"+918789095916\"\n          }\n        }\n      },\n      \"properties\": {\n        \"data\": {\n          \"type\": \"properties\",\n          \"id\": \"12345\",\n          \"attributes\": {\n            \"category\": \"Sale\",\n            \"prices\": {\n              \"monthly\": null,\n              \"yearly\": null\n            },\n            \"reference\": \"\",\n            \"type\": \"Villa\",\n            \"website_link\": \"https://www.propertyfinder.ae\"\n          },\n          \"relationships\": {\n            \"locations\": {\n              \"data\": [\n                {\n                  \"type\": \"locations\",\n                  \"id\": \"1\",\n                  \"attributes\": {\n                    \"name\": \"Dubai\"\n                  }\n                },\n                {\n                  \"type\": \"locations\",\n                  \"id\": \"12345\",\n                  \"attributes\": {\n                    \"name\": \"Damac Lagoons\"\n                  }\n                },\n                {\n                  \"type\": \"locations\",\n                  \"id\": \"12345\",\n                  \"attributes\": {\n                    \"name\": \"Portofino\"\n                  }\n                }\n              ]\n            }\n          }\n        }\n      }\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURLIntegration}}/api/v1/integration/propertyfinder/{{tenant}}/{{apiKey}}",
+									"host": [
+										"{{baseURLIntegration}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"integration",
+										"propertyfinder",
+										"{{tenant}}",
+										"{{apiKey}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "dubbizle",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"listing\": {\n    \"url\": \"\",\n    \"reference\": \"\"\n  },\n  \"id\": \"1291df0-afca-453e-a9b7-20cdfbb9f074\",\n  \"message\": \"Hi, I am interested in your property on Bayut\",\n  \"received_at\": \"2023-09-14T12:00:15.550546Z\",\n  \"enquirer\": {\n    \"name\": \"{{name}}\",\n    \"contact_link\": \"\",\n    \"phone_number\": \"{{mobile}}\"\n  },\n  \"wam_id\": \"\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURLIntegration}}/api/v1/integration/dubizzle/{{tenant}}/{{apiKey}}",
+									"host": [
+										"{{baseURLIntegration}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"integration",
+										"dubizzle",
+										"{{tenant}}",
+										"{{apiKey}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "google_ads_landing_page",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "API-Key",
+										"value": "{{apiKey}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"{{name}}\",\n    \"state\": \"{{state}}\",\n    \"city\": \"{{city}}\",\n    \"postalCode\": \"587121\",\n    \"location\": \"{{location}}\",\n    \"budget\": \"5403192\",\n    \"notes\": \"comments\",\n    \"email\": \"{{email}}\",\n    \"countryCode\": \"91\",\n    \"mobile\": \"{{mobile}}\",\n    \"project\": \"Aamor\",\n    \"property\": \"Villa\",\n    \"leadExpectedBudget\": \"6000000\",\n    \"propertyType\": \"Flat\",\n    \"propertySubType\": \"Plot\",\n    \"submittedDate\": \"28-03-18\",\n    \"submittedTime\": \"22:22:32\",\n    \"subsource\": \"\",\n    \"leadStatus\": \"Schedule Site Visit or Schedule Meeting or Booked or Booking Cancel\",\n    \"callRecordingUrl\": \"\",\n    \"leadScheduledDate\": \"28-03-18\",\n    \"leadScheduleTime\": \"22:22:32\",\n    \"bhkType\": \"Simplex/Duplex/PentHouse/Others\",\n    \"leadBookedDate\": \"28-03-18\",\n    \"leadBookedTime\": \"22:22:32\",\n    \"additionalProperties\": {\n        \"EnquiredFor\": \"Buy/Sale/Rent\",\n        \"BHKType\": \"Simplex/Duplex/PentHouse/Others\",\n        \"NoOfBHK\": \"0\",\n        \"key1\": \"value1\",\n        \"key2\": \"value1\"\n    },\n    \"primaryUser\": \"Rahul N\",\n    \"secondaryUser\": \"Ranjan Gupta\",\n    \"towerName\": \"Matloob Building\",\n    \"subCommunity\": \"Al Safa 1\",\n    \"community\": \"Al Safa\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURLIntegration}}/api/v1/integration/GoogleAds",
+									"host": [
+										"{{baseURLIntegration}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"integration",
+										"GoogleAds"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "microsoft_ads",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "API-Key",
+										"value": "{{apiKey}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"{{name}}\",\n    \"state\": \"{{state}}\",\n    \"city\": \"{{city}}\",\n    \"postalCode\": \"587121\",\n    \"location\": \"{{location}}\",\n    \"budget\": \"5403192\",\n    \"notes\": \"comments\",\n    \"email\": \"{{email}}\",\n    \"countryCode\": \"91\",\n    \"mobile\": \"{{mobile}}\",\n    \"project\": \"Aamor\",\n    \"property\": \"Villa\",\n    \"leadExpectedBudget\": \"6000000\",\n    \"propertyType\": \"Flat\",\n    \"propertySubType\": \"Plot\",\n    \"submittedDate\": \"28-03-18\",\n    \"submittedTime\": \"22:22:32\",\n    \"subsource\": \"\",\n    \"leadStatus\": \"Schedule Site Visit or Schedule Meeting or Booked or Booking Cancel\",\n    \"callRecordingUrl\": \"\",\n    \"leadScheduledDate\": \"28-03-18\",\n    \"leadScheduleTime\": \"22:22:32\",\n    \"bhkType\": \"Simplex/Duplex/PentHouse/Others\",\n    \"leadBookedDate\": \"28-03-18\",\n    \"leadBookedTime\": \"22:22:32\",\n    \"additionalProperties\": {\n        \"EnquiredFor\": \"Buy/Sale/Rent\",\n        \"BHKType\": \"Simplex/Duplex/PentHouse/Others\",\n        \"NoOfBHK\": \"0\",\n        \"key1\": \"value1\",\n        \"key2\": \"value1\"\n    },\n    \"primaryUser\": \"Rahul N\",\n    \"secondaryUser\": \"Ranjan Gupta\",\n    \"towerName\": \"Matloob Building\",\n    \"subCommunity\": \"Al Safa 1\",\n    \"community\": \"Al Safa\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURLIntegration}}/api/v1/integration/MicrosoftAds",
+									"host": [
+										"{{baseURLIntegration}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"integration",
+										"MicrosoftAds"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "website",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "API-Key",
+										"value": "{{apiKey}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "[\n    {\n        \"name\": \"{{name}}\",\n        \"state\": \"{{state}}\",\n        \"city\": \"{{city}}\",\n        \"postalCode\": \"587121\",\n        \"location\": \"{{location}}\",\n        \"budget\": \"5403192\",\n        \"notes\": \"comments\",\n        \"email\": \"{{email}}\",\n        \"countryCode\": \"91\",\n        \"mobile\": \"{{mobile}}\",\n        \"project\": \"Aamor\",\n        \"property\": \"Villa\",\n        \"leadExpectedBudget\": \"6000000\",\n        \"propertyType\": \"Flat\",\n        \"submittedDate\": \"28-03-18\",\n        \"submittedTime\": \"22:22:32\",\n        \"source\": \"\",\n        \"subSource\": \"\",\n        \"agencyName\": \"\",\n        \"leadScheduledDate\": \"28-03-18\",\n        \"leadScheduleTime\": \"22:22:32\",\n        \"leadStatus\": \"Schedule Site Visit or Schedule Meeting or Booked or Booking Cancel\",\n        \"leadBookedDate\": \"28-03-18\",\n        \"leadBookedTime\": \"22:22:32\",\n        \"additionalProperties\": {\n            \"EnquiredFor\": \"Buy/Sale/Rent\",\n            \"BHKType\": \"Simplex/Duplex/PentHouse/Others\",\n            \"NoOfBHK\": \"0\",\n            \"key1\": \"value1\",\n            \"key2\": \"value1\"\n        },\n        \"primaryUser\": \"Rahul N\",\n        \"secondaryUser\": \"Ranjan Gupta\",\n        \"towerName\": \"Matloob Building\",\n        \"subCommunity\": \"Al Safa 1\",\n        \"community\": \"Al Safa\"\n    },\n    {\n        \"name\": \"Atishoo Mazumder\",\n        \"state\": \"West Bengal\",\n        \"city\": \"kolkata\",\n        \"postalCode\": \"587121\",\n        \"location\": \"GK Colony\",\n        \"budget\": \"5403192\",\n        \"notes\": \"comments\",\n        \"email\": \"\",\n        \"countryCode\": \"91\",\n        \"mobile\": \"9988776655\",\n        \"project\": \"Aamor\",\n        \"property\": \"Villa\",\n        \"leadExpectedBudget\": \"6000000\",\n        \"propertyType\": \"Flat\",\n        \"submittedDate\": \"28-03-18\",\n        \"submittedTime\": \"22:22:32\",\n        \"source\": \"\",\n        \"subSource\": \"\",\n        \"agencyName\": \"\",\n        \"leadScheduledDate\": \"28-03-18\",\n        \"leadScheduleTime\": \"22:22:32\",\n        \"leadStatus\": \"Schedule Site Visit or Schedule Meeting or Booked or Booking Cancel\",\n        \"leadBookedDate\": \"28-03-18\",\n        \"leadBookedTime\": \"22:22:32\",\n        \"additionalProperties\": {\n            \"EnquiredFor\": \"Buy/Sale/Rent\",\n            \"BHKType\": \"Simplex/Duplex/PentHouse/Others\",\n            \"NoOfBHK\": \"0\",\n            \"key1\": \"value1\",\n            \"key2\": \"value1\"\n        },\n        \"primaryUser\": \"Varun Kumar\",\n        \"secondaryUser\": \"Vinay Lokre\",\n        \"towerName\": \"Matloob Building\",\n        \"subCommunity\": \"Al Safa 1\",\n        \"community\": \"Al Safa\"\n    }\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURLIntegration}}/api/v1/integration/Website",
+									"host": [
+										"{{baseURLIntegration}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"integration",
+										"Website"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "ToDo",
+					"item": [
+						{
+							"name": "{id}",
+							"item": [
+								{
+									"name": "Get task details.",
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{bearerToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "GET",
+										"header": [
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "tenant",
+												"value": "{{tenant}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "{{bearerToken}}"
+											}
+										],
+										"url": {
+											"raw": "{{baseURL}}/api/v1/todo/06879c8f-5701-4b15-bf41-6e5a0aa0db70",
+											"host": [
+												"{{baseURL}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"todo",
+												"06879c8f-5701-4b15-bf41-6e5a0aa0db70"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Untitled Response",
+											"originalRequest": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "tenant",
+														"value": "",
+														"description": "(Required) Input your tenant Id to access this API"
+													},
+													{
+														"key": "Accept",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer <token>",
+														"description": "Added as a part of security scheme: bearer"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/todo/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"todo",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": {\n    \"id\": \"<string>\",\n    \"title\": \"<string>\",\n    \"status\": \"<string>\",\n    \"createdAt\": \"<dateTime>\",\n    \"notes\": \"<string>\",\n    \"dueDate\": \"<dateTime>\",\n    \"assigneeId\": \"<string>\"\n  },\n  \"success\": \"<boolean>\",\n  \"message\": \"<string>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Update a task.",
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{bearerToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "PUT",
+										"header": [
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "tenant",
+												"value": "{{tenant}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "{{bearerToken}}"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"id\": \"13a9f556-9682-4698-a721-e4e84715a359\",\n  \"title\": \"MyTasku\",\n  \"notes\": \"MyNotesu\",\n  \"priority\": 1,\n  \"isRepeated\": true,\n  \"isMarkedDone\": true,\n  \"scheduledDateTime\": \"2025-05-21T14:01:24.188Z\",\n  \"assignedFrom\": \"d5988881-3f01-4ff6-a987-caa699609046\",\n  \"assignedUserIds\": [\n    \"d5988881-3f01-4ff6-a987-caa699609046\"\n  ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseURL}}/api/v1/todo/13a9f556-9682-4698-a721-e4e84715a359",
+											"host": [
+												"{{baseURL}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"todo",
+												"13a9f556-9682-4698-a721-e4e84715a359"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Untitled Response",
+											"originalRequest": {
+												"method": "PUT",
+												"header": [
+													{
+														"key": "tenant",
+														"value": "",
+														"description": "(Required) Input your tenant Id to access this API"
+													},
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Accept",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer <token>",
+														"description": "Added as a part of security scheme: bearer"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"title\": \"<string>\",\n  \"status\": \"<string>\",\n  \"notes\": \"<string>\",\n  \"dueDate\": \"<dateTime>\",\n  \"assigneeId\": \"<string>\"\n}",
+													"options": {
+														"raw": {
+															"headerFamily": "json",
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/todo/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"todo",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "<string>"
+										}
+									]
+								},
+								{
+									"name": "Delete a task.",
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{bearerToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "tenant",
+												"value": "{{tenant}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "{{bearerToken}}"
+											}
+										],
+										"url": {
+											"raw": "{{baseURL}}/api/v1/todo/fa06edde-9911-49fb-a6e9-c6f2d1e263ee",
+											"host": [
+												"{{baseURL}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"todo",
+												"fa06edde-9911-49fb-a6e9-c6f2d1e263ee"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Untitled Response",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [
+													{
+														"key": "tenant",
+														"value": "",
+														"description": "(Required) Input your tenant Id to access this API"
+													},
+													{
+														"key": "Accept",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer <token>",
+														"description": "Added as a part of security scheme: bearer"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/todo/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"todo",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": \"<boolean>\",\n  \"success\": \"<boolean>\",\n  \"message\": \"<string>\"\n}"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "history",
+							"item": [
+								{
+									"name": "{id}",
+									"item": [
+										{
+											"name": "Get todoHistory of a todo.",
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": [
+														{
+															"key": "token",
+															"value": "{{bearerToken}}",
+															"type": "string"
+														}
+													]
+												},
+												"method": "GET",
+												"header": [
+													{
+														"key": "accept",
+														"value": "application/json"
+													},
+													{
+														"key": "tenant",
+														"value": "{{tenant}}"
+													},
+													{
+														"key": "Authorization",
+														"value": "{{bearerToken}}"
+													}
+												],
+												"url": {
+													"raw": "{{baseURL}}/api/v1/todo/history/06879c8f-5701-4b15-bf41-6e5a0aa0db70",
+													"host": [
+														"{{baseURL}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"todo",
+														"history",
+														"06879c8f-5701-4b15-bf41-6e5a0aa0db70"
+													]
+												}
+											},
+											"response": [
+												{
+													"name": "Untitled Response",
+													"originalRequest": {
+														"method": "GET",
+														"header": [
+															{
+																"key": "tenant",
+																"value": "",
+																"description": "(Required) Input your tenant Id to access this API"
+															},
+															{
+																"key": "Accept",
+																"value": "application/json"
+															},
+															{
+																"key": "Authorization",
+																"value": "Bearer <token>",
+																"description": "Added as a part of security scheme: bearer"
+															}
+														],
+														"url": {
+															"raw": "{{baseUrl}}/api/v1/todo/history/:id",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"api",
+																"v1",
+																"todo",
+																"history",
+																":id"
+															],
+															"variable": [
+																{
+																	"key": "id"
+																}
+															]
+														}
+													},
+													"status": "OK",
+													"code": 200,
+													"_postman_previewlanguage": "json",
+													"header": [
+														{
+															"key": "Content-Type",
+															"value": "application/json"
+														}
+													],
+													"cookie": [],
+													"body": "{\n  \"data\": {\n    \"id_6\": [\n      {\n        \"id\": \"<string>\",\n        \"todoId\": \"<string>\",\n        \"changeDescription\": \"<string>\",\n        \"changedAt\": \"<dateTime>\"\n      },\n      {\n        \"id\": \"<string>\",\n        \"todoId\": \"<string>\",\n        \"changeDescription\": \"<string>\",\n        \"changedAt\": \"<dateTime>\"\n      }\n    ],\n    \"et_82e\": [\n      {\n        \"id\": \"<string>\",\n        \"todoId\": \"<string>\",\n        \"changeDescription\": \"<string>\",\n        \"changedAt\": \"<dateTime>\"\n      },\n      {\n        \"id\": \"<string>\",\n        \"todoId\": \"<string>\",\n        \"changeDescription\": \"<string>\",\n        \"changedAt\": \"<dateTime>\"\n      }\n    ],\n    \"qui_ab2\": [\n      {\n        \"id\": \"<string>\",\n        \"todoId\": \"<string>\",\n        \"changeDescription\": \"<string>\",\n        \"changedAt\": \"<dateTime>\"\n      },\n      {\n        \"id\": \"<string>\",\n        \"todoId\": \"<string>\",\n        \"changeDescription\": \"<string>\",\n        \"changedAt\": \"<dateTime>\"\n      }\n    ],\n    \"ullamco_4b8\": [\n      {\n        \"id\": \"<string>\",\n        \"todoId\": \"<string>\",\n        \"changeDescription\": \"<string>\",\n        \"changedAt\": \"<dateTime>\"\n      },\n      {\n        \"id\": \"<string>\",\n        \"todoId\": \"<string>\",\n        \"changeDescription\": \"<string>\",\n        \"changedAt\": \"<dateTime>\"\n      }\n    ]\n  },\n  \"success\": \"<boolean>\",\n  \"message\": \"<string>\"\n}"
+												}
+											]
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "multiple",
+							"item": [
+								{
+									"name": "Create a multiple tasks for users.",
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{bearerToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "tenant",
+												"value": "{{tenant}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "{{bearerToken}}"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"title\": \"MyTitelu\",\n  \"notes\": \"MyNotesu\",\n  \"priority\": 1,\n  \"isRepeated\": true,\n  \"isMarkedDone\": true,\n  \"scheduledDateTime\": \"2025-04-21T14:06:05.399Z\",\n  \"assignedFrom\": \"d5988881-3f01-4ff6-a987-caa699609046\",\n  \"assignedUserIds\": [\n    \"d5988881-3f01-4ff6-a987-caa699609046\"\n  ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseURL}}/api/v1/todo/multiple",
+											"host": [
+												"{{baseURL}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"todo",
+												"multiple"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Untitled Response",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "tenant",
+														"value": "",
+														"description": "(Required) Input your tenant Id to access this API"
+													},
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Accept",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer <token>",
+														"description": "Added as a part of security scheme: bearer"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"todos\": [\n    {\n      \"title\": \"<string>\",\n      \"notes\": \"<string>\",\n      \"dueDate\": \"<dateTime>\",\n      \"assigneeId\": \"<string>\"\n    },\n    {\n      \"title\": \"<string>\",\n      \"notes\": \"<string>\",\n      \"dueDate\": \"<dateTime>\",\n      \"assigneeId\": \"<string>\"\n    }\n  ]\n}",
+													"options": {
+														"raw": {
+															"headerFamily": "json",
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/todo/multiple",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"todo",
+														"multiple"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": \"<boolean>\",\n  \"success\": \"<boolean>\",\n  \"message\": \"<string>\"\n}"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "sheduleddate",
+							"item": [
+								{
+									"name": "Get todo details by sheduled date.",
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{bearerToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "GET",
+										"header": [
+											{
+												"key": "tenant",
+												"value": "{{tenant}}",
+												"description": "(Required) Input your tenant Id to access this API"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseURL}}/api/v1/todo/sheduleddate?LeadVisibility=0",
+											"host": [
+												"{{baseURL}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"todo",
+												"sheduleddate"
+											],
+											"query": [
+												{
+													"key": "LeadVisibility",
+													"value": "0"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Untitled Response",
+											"originalRequest": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "tenant",
+														"value": "",
+														"description": "(Required) Input your tenant Id to access this API"
+													},
+													{
+														"key": "Accept",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer <token>",
+														"description": "Added as a part of security scheme: bearer"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/api/v1/todo/sheduleddate?LeadVisibility=Private&Date=<dateTime>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"v1",
+														"todo",
+														"sheduleddate"
+													],
+													"query": [
+														{
+															"key": "LeadVisibility",
+															"value": "Private"
+														},
+														{
+															"key": "Date",
+															"value": "<dateTime>"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"data\": [\n    {\n      \"id\": \"<string>\",\n      \"title\": \"<string>\",\n      \"status\": \"<string>\",\n      \"createdAt\": \"<dateTime>\",\n      \"notes\": \"<string>\",\n      \"dueDate\": \"<dateTime>\",\n      \"assigneeId\": \"<string>\"\n    },\n    {\n      \"id\": \"<string>\",\n      \"title\": \"<string>\",\n      \"status\": \"<string>\",\n      \"createdAt\": \"<dateTime>\",\n      \"notes\": \"<string>\",\n      \"dueDate\": \"<dateTime>\",\n      \"assigneeId\": \"<string>\"\n    }\n  ],\n  \"success\": \"<boolean>\",\n  \"message\": \"<string>\"\n}"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "Get all todo details.",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{bearerToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "accept",
+										"value": "application/json"
+									},
+									{
+										"key": "tenant",
+										"value": "sleep"
+									},
+									{
+										"key": "Authorization",
+										"value": ""
+									}
+								],
+								"url": {
+									"raw": "{{baseURL}}/api/v1/todo?PageNumber=1&PageSize=10",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"todo"
+									],
+									"query": [
+										{
+											"key": "PageNumber",
+											"value": "1"
+										},
+										{
+											"key": "PageSize",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Untitled Response",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "tenant",
+												"value": "",
+												"description": "(Required) Input your tenant Id to access this API"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer <token>",
+												"description": "Added as a part of security scheme: bearer"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/todo?SearchTitleOrNotes=<string>&TodoFilterType=Pending&DateType=Created&FromDate=<dateTime>&ToDate=<dateTime>&PageNumber=<integer>&PageSize=<integer>&OrderBy=<string>&AdvancedSearch.Fields=<string>&AdvancedSearch.Keyword=<string>&Keyword=<string>&AdvancedFilter.Logic=<string>&AdvancedFilter.Filters=[object Object]&AdvancedFilter.Field=<string>&AdvancedFilter.Operator=<string>&nullable=true",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"todo"
+											],
+											"query": [
+												{
+													"key": "SearchTitleOrNotes",
+													"value": "<string>"
+												},
+												{
+													"key": "TodoFilterType",
+													"value": "Pending"
+												},
+												{
+													"key": "DateType",
+													"value": "Created"
+												},
+												{
+													"key": "FromDate",
+													"value": "<dateTime>"
+												},
+												{
+													"key": "ToDate",
+													"value": "<dateTime>"
+												},
+												{
+													"key": "PageNumber",
+													"value": "<integer>"
+												},
+												{
+													"key": "PageSize",
+													"value": "<integer>"
+												},
+												{
+													"key": "OrderBy",
+													"value": "<string>"
+												},
+												{
+													"key": "AdvancedSearch.Fields",
+													"value": "<string>"
+												},
+												{
+													"key": "AdvancedSearch.Keyword",
+													"value": "<string>"
+												},
+												{
+													"key": "Keyword",
+													"value": "<string>"
+												},
+												{
+													"key": "AdvancedFilter.Logic",
+													"value": "<string>"
+												},
+												{
+													"key": "AdvancedFilter.Filters",
+													"value": "[object Object]"
+												},
+												{
+													"key": "AdvancedFilter.Field",
+													"value": "<string>"
+												},
+												{
+													"key": "AdvancedFilter.Operator",
+													"value": "<string>"
+												},
+												{
+													"key": "nullable",
+													"value": "true"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"data\": [\n    {\n      \"id\": \"<string>\",\n      \"title\": \"<string>\",\n      \"status\": \"<string>\",\n      \"notes\": \"<string>\",\n      \"dueDate\": \"<dateTime>\"\n    },\n    {\n      \"id\": \"<string>\",\n      \"title\": \"<string>\",\n      \"status\": \"<string>\",\n      \"notes\": \"<string>\",\n      \"dueDate\": \"<dateTime>\"\n    }\n  ],\n  \"pageNumber\": \"<integer>\",\n  \"pageSize\": \"<integer>\",\n  \"totalCount\": \"<integer>\",\n  \"count\": {\n    \"total\": \"<integer>\",\n    \"completed\": \"<integer>\",\n    \"pending\": \"<integer>\"\n  }\n}"
+								}
+							]
+						},
+						{
+							"name": "Create a new task.",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{bearerToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "accept",
+										"value": "application/json"
+									},
+									{
+										"key": "tenant",
+										"value": "sleep"
+									},
+									{
+										"key": "Authorization",
+										"value": "{{bearerToken}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"MyTask1\",\n  \"notes\": \"string\",\n  \"priority\": 1,\n  \"isRepeated\": true,\n  \"isMarkedDone\": true,\n  \"scheduledDateTime\": \"2025-05-21T13:57:33.617Z\",\n  \"assignedFrom\": \"d5988881-3f01-4ff6-a987-caa699609046\",\n  \"assignedUserIds\": [\n    \"d5988881-3f01-4ff6-a987-caa699609046\"\n  ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURL}}/api/v1/todo",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"todo"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Untitled Response",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "tenant",
+												"value": "",
+												"description": "(Required) Input your tenant Id to access this API"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer <token>",
+												"description": "Added as a part of security scheme: bearer"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"title\": \"<string>\",\n  \"notes\": \"<string>\",\n  \"dueDate\": \"<dateTime>\",\n  \"assigneeId\": \"<string>\"\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/todo",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"todo"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"data\": \"<string>\",\n  \"success\": \"<boolean>\",\n  \"message\": \"<string>\"\n}"
+								}
+							]
+						}
+					]
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							"// Get current time in seconds\r",
+							"const now = Math.floor(Date.now() / 1000);\r",
+							"\r",
+							"// Retrieve existing token and expiry from environment\r",
+							"const existingToken = pm.environment.get(\"bearerToken\");\r",
+							"const tokenExpiry = parseInt(pm.environment.get(\"tokenExpiry\") || \"0\");\r",
+							"\r",
+							"// Function to decode JWT and get expiry (exp) field\r",
+							"function getTokenExpiry(token) {\r",
+							"    try {\r",
+							"        const payload = JSON.parse(atob(token.split('.')[1]));\r",
+							"        return payload.exp;\r",
+							"    } catch (e) {\r",
+							"        console.log(\"Failed to parse token expiry:\", e);\r",
+							"        return 0;\r",
+							"    }\r",
+							"}\r",
+							"\r",
+							"// Check if token is valid and not expired\r",
+							"if (existingToken && tokenExpiry > now) {\r",
+							"    console.log(\"Using existing token:\");\r",
+							"    console.log(\"Token:\", existingToken);\r",
+							"} else {\r",
+							"    // Token is expired or not present, make API call\r",
+							"    pm.sendRequest({\r",
+							"        url: pm.environment.get(\"baseURLIdentity\") + \"/api/tokens\",\r",
+							"        method: \"POST\",\r",
+							"        header: {\r",
+							"            \"accept\": \"application/json\",\r",
+							"            \"tenant\": pm.environment.get(\"tenant\"),\r",
+							"            \"Content-Type\": \"application/json\"\r",
+							"        },\r",
+							"        body: {\r",
+							"            mode: \"raw\",\r",
+							"            raw: JSON.stringify({\r",
+							"                username: pm.environment.get(\"username\"),\r",
+							"                password: pm.environment.get(\"password\")\r",
+							"            })\r",
+							"        }\r",
+							"    }, function (err, res) {\r",
+							"        if (err) {\r",
+							"            console.log(\"Error fetching token:\", err);\r",
+							"            return;\r",
+							"        }\r",
+							"        try {\r",
+							"            const jsonData = res.json();\r",
+							"            const idToken = jsonData.data.idToken;\r",
+							"            pm.environment.set(\"bearerToken\", idToken);\r",
+							"\r",
+							"            // Decode expiry and save it\r",
+							"            const exp = getTokenExpiry(idToken);\r",
+							"            pm.environment.set(\"tokenExpiry\", exp);\r",
+							"\r",
+							"            console.log(\"New token fetched and saved:\");\r",
+							"            console.log(\"Token:\", idToken);\r",
+							"        } catch (e) {\r",
+							"            console.log(\"Error parsing token response:\", e);\r",
+							"        }\r",
+							"    });\r",
+							"}\r",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Identity",
+			"item": [
+				{
+					"name": "WebToken",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "tenant",
+								"value": "sleep"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"Bennyy\",\n  \"password\": \"Bennyy@12\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURLIdentity}}/api/tokens",
+							"host": [
+								"{{baseURLIdentity}}"
+							],
+							"path": [
+								"api",
+								"tokens"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "MobileToken",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "tenant",
+								"value": "sleep"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"Bennyy\",\n  \"password\": \"Bennyy@12\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://lrb-identity-api-qa.azurewebsites.net/api/mobile/tokens",
+							"protocol": "https",
+							"host": [
+								"lrb-identity-api-qa",
+								"azurewebsites",
+								"net"
+							],
+							"path": [
+								"api",
+								"mobile",
+								"tokens"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"// ------------------- Dynamic API Key by Integration -------------------\r",
+					"let integration = pm.iterationData.get(\"integration\");\r",
+					"let apiKey = pm.iterationData.get(integration);\r",
+					"pm.environment.set(\"apiKey\", apiKey);\r",
+					"\r",
+					"// ------------------- Random Test Data Generation -------------------\r",
+					"let mobile = '9' + Array.from({ length: 9 }, () => Math.floor(Math.random() * 10)).join('');\r",
+					"let name = pm.variables.replaceIn('{{$randomUserName}}');\r",
+					"const states = ['California', 'Texas', 'Florida', 'Ohio'];\r",
+					"const cities = ['Miami', 'Houston', 'Chicago', 'Atlanta'];\r",
+					"const streets = ['Main', 'Park', 'Elm', 'Cedar'];\r",
+					"\r",
+					"let state = states[Math.floor(Math.random() * states.length)];\r",
+					"let city = cities[Math.floor(Math.random() * cities.length)];\r",
+					"let street = streets[Math.floor(Math.random() * streets.length)];\r",
+					"let location = `${street} Street, ${city}, ${state}`;\r",
+					"let email = `${name.toLowerCase()}@gmail.com`;\r",
+					"\r",
+					"pm.environment.set(\"mobile\", mobile);\r",
+					"pm.environment.set(\"name\", name);\r",
+					"pm.environment.set(\"state\", state);\r",
+					"pm.environment.set(\"city\", city);\r",
+					"pm.environment.set(\"location\", location);\r",
+					"pm.environment.set(\"email\", email);\r",
+					"\r",
+					"console.log(\"Generated Test Data:\", { mobile, name, state, city, location, email });\r",
+					"\r",
+					"// ------------------- Token Handling with Folder Context -------------------\r",
+					"const now = Math.floor(Date.now() / 1000);\r",
+					"const existingToken = pm.environment.get(\"bearerToken\");\r",
+					"const tokenExpiry = parseInt(pm.environment.get(\"tokenExpiry\") || \"0\");\r",
+					"\r",
+					"function getTokenExpiry(token) {\r",
+					"    try {\r",
+					"        const payload = JSON.parse(atob(token.split('.')[1]));\r",
+					"        return payload.exp;\r",
+					"    } catch (e) {\r",
+					"        console.log(\"Failed to parse token expiry:\", e);\r",
+					"        return 0;\r",
+					"    }\r",
+					"}\r",
+					"\r",
+					"// // Read context for token type\r",
+					"// const authContext = pm.variables.get(\"authContext\"); // set in folder as \"mobile\" or \"web\"\r",
+					"// const baseURL = pm.environment.get(\"baseURLIdentity\");\r",
+					"// let tokenURL = `${baseURL}/api/tokens`;\r",
+					"// if (authContext === \"mobile\") {\r",
+					"//     tokenURL = `${baseURL}/api/mobile/tokens`;\r",
+					"// }\r",
+					"\r",
+					"// // Use existing token if valid\r",
+					"// if (existingToken && tokenExpiry > now) {\r",
+					"//     console.log(\"Using existing token:\", existingToken);\r",
+					"// } else {\r",
+					"//     pm.sendRequest({\r",
+					"//         url: tokenURL,\r",
+					"//         method: \"POST\",\r",
+					"//         header: {\r",
+					"//             \"accept\": \"application/json\",\r",
+					"//             \"tenant\": pm.environment.get(\"tenant\"),\r",
+					"//             \"Content-Type\": \"application/json\"\r",
+					"//         },\r",
+					"//         body: {\r",
+					"//             mode: \"raw\",\r",
+					"//             raw: JSON.stringify({\r",
+					"//                 username: pm.environment.get(\"username\"),\r",
+					"//                 password: pm.environment.get(\"password\")\r",
+					"//             })\r",
+					"//         }\r",
+					"//     }, function (err, res) {\r",
+					"//         if (err) {\r",
+					"//             console.log(\"Error fetching token:\", err);\r",
+					"//             return;\r",
+					"//         }\r",
+					"//         try {\r",
+					"//             const jsonData = res.json();\r",
+					"//             const idToken = jsonData.data.idToken;\r",
+					"//             pm.environment.set(\"bearerToken\", idToken);\r",
+					"\r",
+					"//             const exp = getTokenExpiry(idToken);\r",
+					"//             pm.environment.set(\"tokenExpiry\", exp);\r",
+					"\r",
+					"//             console.log(\"New token fetched:\", idToken);\r",
+					"//         } catch (e) {\r",
+					"//             console.log(\"Error parsing token response:\", e);\r",
+					"//         }\r",
+					"//     });\r",
+					"// }\r",
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"pm.test(\"API Status Check\", function () {\r",
+					"    const statusCode = pm.response.code;\r",
+					"    const isSuccess = statusCode >= 200 && statusCode < 300;\r",
+					"\r",
+					"    console.log(\"Status Code:\", statusCode);\r",
+					"\r",
+					"    // Only allow 2xx responses to pass\r",
+					"    pm.expect(isSuccess, `Expected 2xx but got ${statusCode}`).to.be.true;\r",
+					"});\r",
+					""
+				]
+			}
+		}
+	]
+}
